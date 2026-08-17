@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Tir à l'arc — Sensations & Impacts v12</title>
+<style>
+:root{
+  --blue:#0d507b; --blue2:#174f72; --bg:#eef3f7; --card:#fff; --line:#d9e2e8;
+  --text:#14324a; --muted:#6f7c86; --good:#d8efd5; --mid:#fff0c6; --bad:#ffd9d7;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
+header{background:var(--blue);color:#fff;padding:16px;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:22px}
+header p{margin:6px 0 0;font-size:13px;opacity:.92}
+main{max-width:920px;margin:auto;padding:12px}
+.card{background:var(--card);border-radius:18px;padding:14px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+h2{margin:0 0 10px;font-size:20px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
+select,input,button{font:inherit}
+select,input{width:100%;padding:12px;border:1px solid #cbd7df;border-radius:13px;background:#fff;color:#1c2c39}
+button{border:0;border-radius:14px;padding:13px 14px;font-weight:700;cursor:pointer}
+.btn{background:var(--blue);color:#fff}
+.btn2{background:#e8eff4;color:var(--text)}
+.btnDanger{background:#c63e3e;color:#fff}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.status{margin-top:10px;font-size:13px;color:#2d7a46}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tab{flex:1;background:#dfe8ee;color:var(--text)}
+.tab.active{background:var(--blue);color:#fff}
+.hidden{display:none}
+.step{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.stepNum{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff;font-weight:bold}
+.step h2{margin:0}
+.arrowRow{display:grid;grid-template-columns:52px 1fr 1fr 1fr;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.arrowNum{font-size:22px;font-weight:800;text-align:center}
+.arrowRow select{padding:10px 8px}
+.badgeA{background:var(--good)!important}.badgeB{background:var(--mid)!important}.badgeC{background:var(--bad)!important}
+.targetWrap{position:relative;width:min(96vw,680px);margin:8px auto 4px;touch-action:none;user-select:none;-webkit-user-select:none}
+canvas{width:100%;height:auto;display:block;border-radius:50%}
+#target,#analysisTarget{box-shadow:0 3px 12px rgba(0,0,0,.14)}
+.impactPrompt{text-align:center;background:#eaf3f8;border-radius:15px;padding:12px;margin:8px 0;font-size:17px}
+.impactPrompt b{font-size:23px}
+.progress{height:10px;background:#dde6ec;border-radius:8px;overflow:hidden;margin-top:8px}
+.progress > div{height:100%;background:var(--blue);width:0%}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:#edf3f7;border-radius:14px;padding:12px;text-align:center}
+.stat b{display:block;font-size:22px}
+.stat span{font-size:12px;color:var(--muted)}
+.tableWrap{overflow:auto;max-height:440px;border-radius:12px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+th{position:sticky;top:0;background:#eaf1f5;z-index:1}
+.badge{display:inline-block;min-width:28px;padding:4px 7px;border-radius:8px;font-weight:700}
+.A{background:var(--good)} .B{background:var(--mid)} .C{background:var(--bad)}
+.small{font-size:12px;color:var(--muted)}
+.filters{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.analysisBox{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.analysisCard{background:#f2f6f9;padding:12px;border-radius:14px}
+.analysisCard b{font-size:22px}
+.notice{background:#fff7d8;border:1px solid #ead488;border-radius:14px;padding:12px;font-size:13px;margin-bottom:12px}
+.saveInfo{background:#eef8ef;border:1px solid #c9e5cc;border-radius:14px;padding:12px;font-size:13px;margin-top:10px}
+
+/* v8 : choix du numéro sans clavier */
+.arrowPickerTitle{text-align:center;font-weight:800;margin:8px 0}
+.arrowPicker{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin:8px 0 10px}
+.arrowPick{min-height:52px;padding:8px 0;border-radius:13px;background:#e8eff4;color:#14324a;font-size:20px;font-weight:800;border:3px solid transparent}
+.arrowPick.active{background:#0d507b;color:#fff;border-color:#0d507b;transform:scale(1.04)}
+.arrowPick.done{background:#d8efd5;color:#214f2d}
+.arrowPick.done.active{background:#0d507b;color:#fff}
+.dragHelp{background:#eef7fc;border:1px solid #b9d8e9;border-radius:14px;padding:10px;text-align:center;font-size:14px;margin-bottom:8px}
+.dragHelp strong{font-size:16px}
+
+/* Loupe flottante, au-dessus du doigt */
+#magnifier{
+  position:absolute;width:132px;height:132px;border-radius:50%;border:4px solid #fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.35);background:#fff;pointer-events:none;
+  display:none;z-index:4;overflow:hidden;transform:translate(-50%,-115%);
+}
+#magnifier canvas{width:132px;height:132px;border-radius:50%}
+#crosshair{
+  position:absolute;left:50%;top:50%;width:24px;height:24px;transform:translate(-50%,-50%);
+  pointer-events:none;display:none;z-index:3;
+}
+#crosshair:before,#crosshair:after{content:"";position:absolute;background:#0d507b}
+#crosshair:before{left:11px;top:0;width:3px;height:24px}
+#crosshair:after{left:0;top:11px;width:24px;height:3px}
+
+@media(max-width:700px){
+  .arrowRow{grid-template-columns:42px 1fr 1fr}
+  .arrowRow .clickerCell{grid-column:2/4}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .filters{grid-template-columns:1fr 1fr}
+  .arrowPicker{grid-template-columns:repeat(6,1fr)}
+  .arrowPick{min-height:50px;font-size:19px;padding:6px 0}
+  .card{padding:12px}
+}
+</style>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0d507b">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+<header>
+  <h1>Tir à l'arc — Sensations ↔ Impacts</h1>
+  <p>1) sensation de chaque flèche • 2) choisis son numéro • 3) maintiens le doigt sur la cible, déplace, puis relâche</p>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="saisie">Saisie</button>
+    <button class="tab" data-tab="historique">Historique</button>
+    <button class="tab" data-tab="analyse">Analyse</button>
+  </div>
+
+  <section id="saisie">
+    <div class="card">
+      <h2>Sauvegarde</h2>
+      <div class="saveInfo">
+        <b>Les données sont enregistrées automatiquement dans le téléphone.</b><br>
+        Le choix d'un dossier n'est pas obligatoire. Pour conserver une copie externe, utilise « Télécharger le CSV ».
+      </div>
+      <div class="actions">
+        <button class="btn" id="installApp" style="display:none">Installer l’application</button>
+        <button class="btn" id="downloadCsv">Télécharger le CSV</button>
+        <button class="btn2" id="chooseFolder">Choisir un dossier (si compatible)</button>
+      </div>
+      <div class="status" id="folderStatus">Sauvegarde locale automatique active.</div>
+    </div>
+
+    <div class="card">
+      <div class="grid">
+        <div><label>Date</label><input type="date" id="date"></div>
+        <div><label>Distance</label>
+          <select id="distance"><option value="18">18 m</option><option value="25">25 m</option><option value="30">30 m</option><option value="50" selected>50 m</option><option value="60">60 m</option><option value="70">70 m</option></select>
+        </div>
+        <div><label>Puissance</label>
+          <select id="power"><option value="25">25 lbs</option><option value="30" selected>30 lbs</option></select>
+        </div>
+        <div><label>Repère clicker</label><input id="clickerMark" placeholder="ex. 8" inputmode="decimal"></div>
+        <div><label>Nombre de flèches / volée</label>
+          <select id="volleySize"><option value="3">3</option><option value="6" selected>6</option><option value="9">9</option><option value="12">12</option><option value="15">15</option><option value="18">18</option><option value="21">21</option></select>
+        </div>
+        <div><label>Commentaire volée</label><input id="volleyComment" placeholder="facultatif"></div>
+      </div>
+    </div>
+
+    <div class="card" id="sensCard">
+      <div class="step"><div class="stepNum">1</div><h2>Sensations AVANT de voir la cible</h2></div>
+      <div class="notice">Pour chaque flèche, note ce que tu as réellement ressenti. Tu ne renseignes aucun score ici.</div>
+      <div id="sensRows"></div>
+      <button class="btn" id="goImpacts" style="width:100%;margin-top:14px">J'ai noté mes sensations → saisir les impacts</button>
+    </div>
+
+    <div class="card hidden" id="impactCard">
+      <div class="step"><div class="stepNum">2</div><h2>Impacts À LA CIBLE</h2></div>
+      <div class="impactPrompt" id="impactPrompt">Choisis d'abord le <b>numéro de la flèche</b>.</div>
+
+      <div class="arrowPickerTitle">Numéro de la flèche</div>
+      <div id="arrowPicker" class="arrowPicker"></div>
+
+      <div id="impactStatus" class="notice" style="text-align:center">Impacts enregistrés : <b>0</b></div>
+      <div class="progress"><div id="progressBar"></div></div>
+
+      <div class="dragHelp"><strong>Pose le doigt sur l'impact → garde appuyé → déplace → relâche.</strong><br>La loupe permet de placer le point précisément sans que ton doigt cache la cible.</div>
+
+      <div class="targetWrap" id="targetWrap">
+        <canvas id="target" width="900" height="900"></canvas>
+        <div id="crosshair"></div>
+        <div id="magnifier"><canvas id="magCanvas" width="264" height="264"></canvas></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn2" id="clearSelectedImpact">Effacer l'impact choisi</button>
+        <button class="btn" id="finishVolleyManual">Terminer la volée</button>
+      </div>
+      <button class="btnDanger" id="cancelVolley" style="width:100%;margin-top:10px">Annuler la volée</button>
+    </div>
+
+    <div class="card">
+      <div class="stats">
+        <div class="stat"><b id="nShots">0</b><span>flèches séance</span></div>
+        <div class="stat"><b id="avg">—</b><span>moyenne</span></div>
+        <div class="stat"><b id="zone8">—</b><span>zone 8+</span></div>
+        <div class="stat"><b id="aPct">—</b><span>sensations A</span></div>
+      </div>
+      <button class="btn2" id="newSession" style="width:100%;margin-top:12px">Nouvelle séance</button>
+    </div>
+  </section>
+
+  <section id="historique" class="hidden">
+    <div class="card">
+      <h2>Historique des flèches</h2>
+      <div class="actions">
+        <button class="btn" id="exportCsv">Télécharger le CSV</button>
+        <button class="btn2" id="clearAll">Effacer toutes les données</button>
+      </div>
+      <div style="margin-top:12px">
+        <label>Importer un CSV existant</label>
+        <input type="file" id="importCsv" accept=".csv,text/csv">
+      </div>
+      <div class="tableWrap" style="margin-top:12px">
+        <table>
+          <thead><tr><th>#</th><th>Volée</th><th>Date</th><th>Dist.</th><th>lbs</th><th>Sens.</th><th>Ancrage</th><th>Clicker</th><th>Score</th><th>Impact X cm</th><th>Impact Y cm</th><th>Écart centre cm</th><th>Direction</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="analyse" class="hidden">
+    <div class="card">
+      <h2>Analyse sensations ↔ résultats</h2>
+      <div class="filters">
+        <div><label>Distance</label><select id="fDistance"><option value="">Toutes</option><option value="18">18 m</option><option value="25">25 m</option><option value="30">30 m</option><option value="50">50 m</option><option value="60">60 m</option><option value="70">70 m</option></select></div>
+        <div><label>Puissance</label><select id="fPower"><option value="">Toutes</option><option value="25">25 lbs</option><option value="30">30 lbs</option></select></div>
+        <div><label>Sensation</label><select id="fSens"><option value="">Toutes</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label>Période d'analyse</label>
+        <select id="fPeriod">
+          <option value="">Toutes les dates</option>
+          <option value="day">Une date précise</option>
+          <option value="range">Une période</option>
+        </select>
+      </div>
+
+      <div id="singleDateBox" class="hidden" style="margin-top:10px">
+        <label>Date</label>
+        <input type="date" id="fDate">
+      </div>
+
+      <div id="rangeDateBox" class="grid hidden" style="margin-top:10px">
+        <div>
+          <label>Du</label>
+          <input type="date" id="fDateFrom">
+        </div>
+        <div>
+          <label>Au</label>
+          <input type="date" id="fDateTo">
+        </div>
+      </div>
+
+      <button class="btn2" id="resetAnalysisFilters" style="width:100%;margin-top:10px">Réinitialiser les filtres</button>
+      <div class="analysisBox">
+        <div class="analysisCard"><b id="anCount">0</b><div class="small">flèches</div></div>
+        <div class="analysisCard"><b id="anAvg">—</b><div class="small">moyenne</div></div>
+        <div class="analysisCard"><b id="anCx">—</b><div class="small">centre X (cm)</div></div>
+        <div class="analysisCard"><b id="anCy">—</b><div class="small">centre Y (cm)</div></div>
+      </div>
+      <canvas id="analysisTarget" width="900" height="900" style="margin-top:12px"></canvas>
+      <div class="small" style="text-align:center;margin-top:8px">Point rouge = centre moyen du groupement filtré.</div>
+    </div>
+  </section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const STORE="tir_arc_impacts_v2", SESSION="tir_arc_session_v2";
+let shots=JSON.parse(localStorage.getItem(STORE)||"[]");
+let sessionId=localStorage.getItem(SESSION)||newSessionId();
+let dirHandle=null, pending=[], selectedImpactIndex=null, volleyNo=nextVolleyNo();
+let dragActive=false, dragPoint=null;
+
+function newSessionId(){const id=new Date().toISOString().replace(/[:.]/g,"-");localStorage.setItem(SESSION,id);return id}
+function currentShots(){return shots.filter(s=>s.session_id===sessionId)}
+function nextVolleyNo(){const a=shots.filter(s=>s.session_id===sessionId);return a.length?Math.max(...a.map(s=>Number(s.volley_no)||1))+1:1}
+function todayLocal(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
+$("date").value=todayLocal();
+
+function buildSensRows(){
+  const n=+$("volleySize").value;
+  const old=pending.length===n?pending:[];
+  pending=Array.from({length:n},(_,i)=>old[i]||{n:i+1,sensation:"",anchor:"",clicker_feel:""});
+  $("sensRows").innerHTML=pending.map((p,i)=>`
+    <div class="arrowRow">
+      <div class="arrowNum">${i+1}</div>
+      <div>
+        <label>Sensation</label>
+        <select class="sensSel" data-i="${i}">
+          <option value="">—</option><option value="A" ${p.sensation==="A"?"selected":""}>A — bonne</option>
+          <option value="B" ${p.sensation==="B"?"selected":""}>B — moyenne</option>
+          <option value="C" ${p.sensation==="C"?"selected":""}>C — mauvaise</option>
+        </select>
+      </div>
+      <div>
+        <label>Ancrage</label>
+        <select class="anchorSel" data-i="${i}">
+          <option value="">—</option><option ${p.anchor==="Bon"?"selected":""}>Bon</option><option ${p.anchor==="Moyen"?"selected":""}>Moyen</option><option ${p.anchor==="Perdu"?"selected":""}>Perdu</option>
+        </select>
+      </div>
+      <div class="clickerCell">
+        <label>Passage clicker</label>
+        <select class="clickSel" data-i="${i}">
+          <option value="">—</option><option ${p.clicker_feel==="Fluide"?"selected":""}>Fluide</option><option ${p.clicker_feel==="Correct"?"selected":""}>Correct</option>
+          <option ${p.clicker_feel==="Forcé"?"selected":""}>Forcé</option><option ${p.clicker_feel==="Difficile"?"selected":""}>Difficile</option>
+        </select>
+      </div>
+    </div>`).join("");
+  bindSens();
+}
+function bindSens(){
+  document.querySelectorAll(".sensSel").forEach(x=>x.onchange=()=>{pending[+x.dataset.i].sensation=x.value; x.classList.remove("badgeA","badgeB","badgeC"); if(x.value)x.classList.add("badge"+x.value)});
+  document.querySelectorAll(".anchorSel").forEach(x=>x.onchange=()=>pending[+x.dataset.i].anchor=x.value);
+  document.querySelectorAll(".clickSel").forEach(x=>x.onchange=()=>pending[+x.dataset.i].clicker_feel=x.value);
+  document.querySelectorAll(".sensSel").forEach(x=>{if(x.value)x.classList.add("badge"+x.value)});
+}
+$("volleySize").onchange=buildSensRows;
+buildSensRows();
+
+function buildArrowPicker(){
+  $("arrowPicker").innerHTML=pending.map((p,i)=>`
+    <button class="arrowPick ${p.x_cm!==undefined?"done":""} ${selectedImpactIndex===i?"active":""}" data-i="${i}">
+      ${i+1}
+    </button>`).join("");
+  document.querySelectorAll(".arrowPick").forEach(b=>b.onclick=()=>{
+    selectedImpactIndex=+b.dataset.i;
+    updateImpactPrompt();
+  });
+}
+
+$("goImpacts").onclick=()=>{
+  if(pending.some(p=>!p.sensation)){
+    if(!confirm("Certaines flèches n'ont pas de sensation A/B/C. Continuer quand même ?")) return;
+  }
+  selectedImpactIndex=null;
+  pending.forEach(p=>{delete p.x_cm;delete p.y_cm;delete p.radius_cm;delete p.direction;delete p.score;delete p.x});
+  $("sensCard").classList.add("hidden");
+  $("impactCard").classList.remove("hidden");
+  updateImpactPrompt();
+  drawFace($("target"),[]);
+  window.scrollTo({top:$("impactCard").offsetTop-70,behavior:"smooth"});
+};
+
+function updateImpactPrompt(){
+  const completed=pending.filter(x=>x.x_cm!==undefined).length;
+  $("progressBar").style.width=`${100*completed/pending.length}%`;
+  $("impactStatus").innerHTML=`Impacts enregistrés : <b>${completed}/${pending.length}</b>`;
+  $("finishVolleyManual").style.boxShadow = completed === pending.length ? "0 0 0 4px rgba(13,80,123,.20)" : "none";
+  $("finishVolleyManual").textContent = completed === pending.length ? "✓ Terminer la volée" : "Terminer la volée";
+  buildArrowPicker();
+  if(selectedImpactIndex===null){
+    if (completed === pending.length && pending.length > 0) {
+      $("impactPrompt").innerHTML =
+        "✅ <b>Tous les impacts sont saisis.</b> Tu peux maintenant terminer la volée.<br>" +
+        "<span style='font-size:14px'>Pour corriger une flèche, touche son numéro puis replace son impact.</span>";
+    } else {
+      $("impactPrompt").innerHTML="Choisis le <b>numéro de la flèche</b>, puis place son impact.";
+    }
+  }else{
+    const p=pending[selectedImpactIndex], done=p && p.x_cm!==undefined;
+    $("impactPrompt").innerHTML=done
+      ? `Flèche <b>${selectedImpactIndex+1}</b> — impact déjà saisi. Maintiens et déplace sur la cible pour le corriger.`
+      : `Flèche <b>${selectedImpactIndex+1}</b> sélectionnée — maintiens le doigt sur l'impact, ajuste, puis relâche.`;
+  }
+  drawFace($("target"),pending.filter(p=>p.x_cm!==undefined));
+}
+
+$("clearSelectedImpact").onclick=()=>{
+  if(selectedImpactIndex===null){ alert("Choisis d'abord le numéro de la flèche à effacer."); return; }
+  const p=pending[selectedImpactIndex];
+  if(!p)return;
+  delete p.x_cm;delete p.y_cm;delete p.radius_cm;delete p.direction;delete p.score;delete p.x;
+  localStorage.setItem("tir_arc_pending_impacts_v11", JSON.stringify(pending));
+  updateImpactPrompt();
+};
+
+$("finishVolleyManual").onclick=async()=>{
+  const completed=pending.filter(p=>p.x_cm!==undefined).length;
+  if(completed===0){alert("Aucun impact n'a été saisi.");return;}
+  if(completed<pending.length){
+    if(!confirm(`Il manque ${pending.length-completed} impact(s). Terminer quand même la volée ?`)) return;
+  }
+  await finishVolley();
+};
+
+$("cancelVolley").onclick=()=>{
+  if(confirm("Annuler cette volée et revenir aux sensations ?")){
+    $("impactCard").classList.add("hidden");$("sensCard").classList.remove("hidden");
+    buildSensRows();
+  }
+};
+
+function drawFace(canvas,points=[],centerPoint=null,preview=null){
+  const ctx=canvas.getContext("2d"),W=canvas.width,cx=W/2,cy=W/2,R=W*.46;
+  ctx.clearRect(0,0,W,W);
+  const colors=["#fff","#fff","#111","#111","#46b9cf","#46b9cf","#f43a31","#f43a31","#ffe72c","#ffe72c"];
+  for(let score=1;score<=10;score++){
+    const r=R*(11-score)/10;
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle=colors[score-1];ctx.fill();
+    ctx.lineWidth=1.2;ctx.strokeStyle="#333";ctx.stroke();
+  }
+  ctx.beginPath();ctx.arc(cx,cy,R*.05,0,Math.PI*2);ctx.strokeStyle="#333";ctx.stroke();
+  const sensColor=s=>s==="A"?"#1f8a3b":s==="B"?"#d98b00":s==="C"?"#c83232":"#333";
+  points.forEach((p,i)=>{
+    if(p.x_cm===undefined || p.x_cm===null)return;
+    const px=cx+(Number(p.x_cm)/61)*R,py=cy+(Number(p.y_cm)/61)*R;
+    ctx.beginPath();ctx.arc(px,py,11,0,Math.PI*2);
+    ctx.fillStyle=sensColor(p.sensation);ctx.fill();
+    ctx.lineWidth=2;ctx.strokeStyle="#fff";ctx.stroke();
+    ctx.fillStyle="#fff";ctx.font="bold 15px Arial";ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText(String(p.arrow_in_volley || p.n || p.shot_no || i+1),px,py);
+  });
+  if(preview){
+    ctx.beginPath();ctx.arc(preview.px,preview.py,15,0,Math.PI*2);
+    ctx.fillStyle="rgba(13,80,123,.75)";ctx.fill();ctx.lineWidth=4;ctx.strokeStyle="#fff";ctx.stroke();
+  }
+  if(centerPoint){
+    const px=cx+(centerPoint.x/61)*R,py=cy+(centerPoint.y/61)*R;
+    ctx.beginPath();ctx.arc(px,py,14,0,Math.PI*2);
+    ctx.fillStyle="#b60000";ctx.fill();ctx.lineWidth=3;ctx.strokeStyle="#fff";ctx.stroke();
+  }
+}
+drawFace($("target"));drawFace($("analysisTarget"));
+
+function scoreFromXY(x,y){
+  const r=Math.hypot(x,y);
+  if(r>61)return 0;
+  if(r<=3.05)return 10;
+  return Math.max(1,11-Math.ceil(r/6.1));
+}
+function isX(x,y){return Math.hypot(x,y)<=3.05}
+function directionFromXY(x,y){
+  const r=Math.hypot(x,y);
+  if(r<2)return "Centre";
+  const a=Math.atan2(-y,x)*180/Math.PI;
+  if(a>=-22.5 && a<22.5)return "Droite";
+  if(a>=22.5 && a<67.5)return "Haut-droite";
+  if(a>=67.5 && a<112.5)return "Haut";
+  if(a>=112.5 && a<157.5)return "Haut-gauche";
+  if(a>=157.5 || a<-157.5)return "Gauche";
+  if(a>=-157.5 && a<-112.5)return "Bas-gauche";
+  if(a>=-112.5 && a<-67.5)return "Bas";
+  return "Bas-droite";
+}
+
+function eventToTargetPoint(e){
+  const c=$("target"), rect=c.getBoundingClientRect();
+  const sx=c.width/rect.width, sy=c.height/rect.height;
+  const px=(e.clientX-rect.left)*sx, py=(e.clientY-rect.top)*sy;
+  const cx=c.width/2, cy=c.height/2, R=c.width*.46;
+  const dx=px-cx,dy=py-cy;
+  return {px,py,cx,cy,R,dx,dy,inside:Math.hypot(dx,dy)<=R,
+          x:+(dx/R*61).toFixed(1), y:+(dy/R*61).toFixed(1),
+          cssX:e.clientX-rect.left, cssY:e.clientY-rect.top};
+}
+
+function showMagnifier(pt){
+  const mag=$("magnifier"), wrap=$("targetWrap"), c=$("target"), mc=$("magCanvas"), mctx=mc.getContext("2d");
+  mag.style.display="block";
+  $("crosshair").style.display="block";
+  const wrapRect=wrap.getBoundingClientRect(), cRect=c.getBoundingClientRect();
+  const wx=(cRect.left-wrapRect.left)+pt.cssX, wy=(cRect.top-wrapRect.top)+pt.cssY;
+  mag.style.left=wx+"px";
+  mag.style.top=Math.max(145,wy)+"px";
+  $("crosshair").style.left=wx+"px";
+  $("crosshair").style.top=wy+"px";
+
+  const zoom=2.8, srcSize=mc.width/zoom;
+  const sourceX=pt.px-srcSize/2, sourceY=pt.py-srcSize/2;
+  mctx.clearRect(0,0,mc.width,mc.height);
+  mctx.drawImage(c,sourceX,sourceY,srcSize,srcSize,0,0,mc.width,mc.height);
+  mctx.strokeStyle="#0d507b";mctx.lineWidth=4;
+  mctx.beginPath();mctx.moveTo(mc.width/2,0);mctx.lineTo(mc.width/2,mc.height);mctx.stroke();
+  mctx.beginPath();mctx.moveTo(0,mc.height/2);mctx.lineTo(mc.width,mc.height/2);mctx.stroke();
+}
+
+function hideMagnifier(){
+  $("magnifier").style.display="none";
+  $("crosshair").style.display="none";
+}
+
+const target=$("target");
+target.addEventListener("pointerdown",e=>{
+  if(selectedImpactIndex===null){
+    const completed = pending.filter(q => q.x_cm !== undefined).length;
+    if (completed === pending.length && pending.length > 0) {
+      $("impactPrompt").innerHTML =
+        "✅ <b>Tous les impacts sont saisis.</b> Appuie sur « Terminer la volée ».<br>" +
+        "<span style='font-size:14px'>Pour corriger un impact, touche son numéro puis replace-le sur la cible.</span>";
+      return;
+    }
+    $("impactPrompt").innerHTML = "Choisis d'abord le <b>numéro de la flèche</b>.";
+    return;
+  }
+  e.preventDefault();
+  target.setPointerCapture?.(e.pointerId);
+  const pt=eventToTargetPoint(e);
+  if(!pt.inside)return;
+  dragActive=true; dragPoint=pt;
+  drawFace(target,pending.filter(p=>p.x_cm!==undefined),null,pt);
+  showMagnifier(pt);
+});
+
+target.addEventListener("pointermove",e=>{
+  if(!dragActive)return;
+  e.preventDefault();
+  const pt=eventToTargetPoint(e);
+  if(!pt.inside)return;
+  dragPoint=pt;
+  drawFace(target,pending.filter(p=>p.x_cm!==undefined),null,pt);
+  showMagnifier(pt);
+});
+
+async function finishDrag(e){
+  if(!dragActive)return;
+  e.preventDefault();
+  dragActive=false;
+  hideMagnifier();
+  if(!dragPoint || !dragPoint.inside){
+    dragPoint=null;updateImpactPrompt();return;
+  }
+  const p=pending[selectedImpactIndex];
+  if(!p){dragPoint=null;return;}
+  const x=dragPoint.x,y=dragPoint.y,r=+Math.hypot(x,y).toFixed(1),sc=scoreFromXY(x,y);
+  p.x_cm=x;p.y_cm=y;p.radius_cm=r;p.direction=directionFromXY(x,y);p.score=sc;p.x=isX(x,y);
+  localStorage.setItem("tir_arc_pending_impacts_v11",JSON.stringify(pending));
+  dragPoint=null;
+  const nextMissing = pending.findIndex(q => q.x_cm === undefined);
+  selectedImpactIndex = nextMissing >= 0 ? nextMissing : null;
+  updateImpactPrompt();
+}
+target.addEventListener("pointerup",finishDrag);
+target.addEventListener("pointercancel",()=>{dragActive=false;dragPoint=null;hideMagnifier();updateImpactPrompt()});
+target.addEventListener("contextmenu",e=>e.preventDefault());
+
+async function finishVolley(){
+  const baseNo=currentShots().length;
+  const meta={session_id:sessionId,date:$("date").value,distance_m:+$("distance").value,power_lbs:+$("power").value,clicker_mark:$("clickerMark").value.trim(),volley_no:volleyNo,volley_comment:$("volleyComment").value.trim()};
+  pending.filter(p=>p.x_cm!==undefined).forEach((p,i)=>shots.push({
+    ...meta,id:crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random(),timestamp:new Date().toISOString(),
+    shot_no:baseNo+i+1,arrow_in_volley:p.n,sensation:p.sensation,anchor:p.anchor,clicker_feel:p.clicker_feel,
+    x_cm:p.x_cm,y_cm:p.y_cm,radius_cm:p.radius_cm,direction:p.direction,score:p.score,x:p.x
+  }));
+  volleyNo++;
+  saveLocal();
+  localStorage.removeItem("tir_arc_pending_impacts_v11");
+  await writeCsvIfPossible();
+  alert("Volée enregistrée. Tu peux saisir les sensations de la volée suivante.");
+  pending=[];buildSensRows();$("impactCard").classList.add("hidden");$("sensCard").classList.remove("hidden");
+  window.scrollTo({top:$("sensCard").offsetTop-90,behavior:"smooth"});
+}
+
+function saveLocal(){
+  localStorage.setItem(STORE,JSON.stringify(shots));
+  $("folderStatus").textContent = dirHandle
+    ? "Sauvegarde locale OK + tentative de mise à jour du CSV dans le dossier choisi."
+    : "Sauvegarde locale automatique OK.";
+  renderAll();
+}
+function renderAll(){
+  const cs=currentShots();
+  $("nShots").textContent=cs.length;
+  $("avg").textContent=cs.length?(cs.reduce((a,b)=>a+Number(b.score||0),0)/cs.length).toFixed(2):"—";
+  $("zone8").textContent=cs.length?Math.round(100*cs.filter(s=>Number(s.score)>=8).length/cs.length)+"%":"—";
+  $("aPct").textContent=cs.length?Math.round(100*cs.filter(s=>s.sensation==="A").length/cs.length)+"%":"—";
+  $("historyBody").innerHTML=shots.slice().reverse().map(s=>`<tr><td>${s.shot_no}</td><td>${s.volley_no}</td><td>${s.date}</td><td>${s.distance_m}</td><td>${s.power_lbs}</td><td><span class="badge ${s.sensation||""}">${s.sensation||"—"}</span></td><td>${s.anchor||"—"}</td><td>${s.clicker_feel||"—"}</td><td>${s.x?"X":s.score}</td><td>${s.x_cm ?? "—"}</td><td>${s.y_cm ?? "—"}</td><td>${s.radius_cm ?? "—"}</td><td>${s.direction ?? "—"}</td></tr>`).join("");
+  renderAnalysis();
+}
+renderAll();
+
+$("newSession").onclick=()=>{if(confirm("Commencer une nouvelle séance ? L'historique est conservé.")){sessionId=newSessionId();volleyNo=1;renderAll()}};
+
+function filteredShots(){
+  const period = $("fPeriod").value;
+  const exactDate = $("fDate").value;
+  const from = $("fDateFrom").value;
+  const to = $("fDateTo").value;
+
+  return shots.filter(s=>{
+    if ($("fDistance").value && String(s.distance_m) !== $("fDistance").value) return false;
+    if ($("fPower").value && String(s.power_lbs) !== $("fPower").value) return false;
+    if ($("fSens").value && s.sensation !== $("fSens").value) return false;
+
+    const shotDate = String(s.date || "").slice(0,10);
+
+    if (period === "day" && exactDate && shotDate !== exactDate) return false;
+    if (period === "range") {
+      if (from && shotDate < from) return false;
+      if (to && shotDate > to) return false;
+    }
+    return true;
+  });
+}
+function renderAnalysis(){
+  const a=filteredShots();$("anCount").textContent=a.length;$("anAvg").textContent=a.length?(a.reduce((x,s)=>x+Number(s.score||0),0)/a.length).toFixed(2):"—";
+  const valid=a.filter(s=>s.x_cm!=null&&s.y_cm!=null);
+  const mx=valid.length?valid.reduce((x,s)=>x+Number(s.x_cm),0)/valid.length:0,my=valid.length?valid.reduce((x,s)=>x+Number(s.y_cm),0)/valid.length:0;
+  $("anCx").textContent=valid.length?mx.toFixed(1):"—";$("anCy").textContent=valid.length?my.toFixed(1):"—";
+  drawFace($("analysisTarget"),valid,valid.length?{x:mx,y:my}:null)
+}
+
+$("fPeriod").onchange=()=>{
+  const mode=$("fPeriod").value;
+  $("singleDateBox").classList.toggle("hidden", mode!=="day");
+  $("rangeDateBox").classList.toggle("hidden", mode!=="range");
+  renderAnalysis();
+};
+
+["fDistance","fPower","fSens","fDate","fDateFrom","fDateTo"].forEach(id=>$(id).onchange=renderAnalysis);
+
+$("resetAnalysisFilters").onclick=()=>{
+  $("fDistance").value="";
+  $("fPower").value="";
+  $("fSens").value="";
+  $("fPeriod").value="";
+  $("fDate").value="";
+  $("fDateFrom").value="";
+  $("fDateTo").value="";
+  $("singleDateBox").classList.add("hidden");
+  $("rangeDateBox").classList.add("hidden");
+  renderAnalysis();
+};
+
+document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));btn.classList.add("active");
+  ["saisie","historique","analyse"].forEach(id=>$(id).classList.add("hidden"));$(btn.dataset.tab).classList.remove("hidden");renderAll()
+});
+
+function csvText(){
+  const sep=";",cols=["session_id","date","timestamp","distance_m","power_lbs","clicker_mark","volley_no","shot_no","arrow_in_volley","sensation","anchor","clicker_feel","impact_x_cm","impact_y_cm","impact_ecart_centre_cm","impact_direction","score","impact_X","volley_comment"];
+  const esc=v=>{const s=String(v??"");return /[;"\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s};
+  const val=(s,c)=>{
+    if(c==="impact_x_cm")return s.x_cm;
+    if(c==="impact_y_cm")return s.y_cm;
+    if(c==="impact_ecart_centre_cm")return s.radius_cm ?? (s.x_cm!=null && s.y_cm!=null ? Math.hypot(s.x_cm,s.y_cm).toFixed(1) : "");
+    if(c==="impact_direction")return s.direction ?? (s.x_cm!=null && s.y_cm!=null ? directionFromXY(s.x_cm,s.y_cm) : "");
+    if(c==="impact_X")return s.x ? "OUI" : "NON";
+    return s[c];
+  };
+  return "\ufeff"+cols.join(sep)+"\n"+shots.map(s=>cols.map(c=>esc(val(s,c))).join(sep)).join("\n")
+}
+
+function downloadCsv(){
+  const blob=new Blob([csvText()],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");
+  const d=new Date(), stamp=[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("");
+  a.href=URL.createObjectURL(blob);
+  a.download=`tir_arc_impacts_${stamp}.csv`;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  $("folderStatus").textContent="CSV généré : regarde dans les téléchargements du téléphone.";
+}
+$("downloadCsv").onclick=downloadCsv;
+$("exportCsv").onclick=downloadCsv;
+
+async function getDB(){return new Promise((res,rej)=>{const r=indexedDB.open("tir_arc_db_v2",1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains("handles"))r.result.createObjectStore("handles")};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function saveHandle(h){const db=await getDB();return new Promise((res,rej)=>{const tx=db.transaction("handles","readwrite");tx.objectStore("handles").put(h,"dir");tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
+async function loadHandle(){try{const db=await getDB();return await new Promise((res,rej)=>{const tx=db.transaction("handles","readonly"),r=tx.objectStore("handles").get("dir");r.onsuccess=()=>res(r.result||null);r.onerror=()=>rej(r.error)})}catch(e){return null}}
+async function ensurePermission(h){if(!h)return false;const o={mode:"readwrite"};if(await h.queryPermission(o)==="granted")return true;return await h.requestPermission(o)==="granted"}
+
+async function writeCsvIfPossible(){
+  if(!dirHandle)return false;
+  try{
+    if(!await ensurePermission(dirHandle))return false;
+    const fh=await dirHandle.getFileHandle("tir_arc_impacts.csv",{create:true}),w=await fh.createWritable();
+    await w.write(csvText());await w.close();
+    $("folderStatus").textContent="CSV mis à jour automatiquement dans : "+dirHandle.name+"/tir_arc_impacts.csv";
+    return true
+  } catch(e) {
+    $("folderStatus").textContent="Sauvegarde locale OK. Écriture directe dans le dossier impossible sur ce navigateur.";
+    return false
+  }
+}
+
+$("chooseFolder").onclick=async()=>{
+  if(!window.showDirectoryPicker){
+    $("folderStatus").textContent="Ce téléphone/navigateur ne permet pas le choix direct d'un dossier. Utilise « Télécharger le CSV ».";
+    alert("Le choix direct d'un dossier n'est pas compatible ici. Tes données restent sauvegardées automatiquement. Pour créer le CSV, touche « Télécharger le CSV ».");
+    return;
+  }
+  try{
+    dirHandle=await window.showDirectoryPicker({mode:"readwrite"});
+    await saveHandle(dirHandle);
+    const ok=await writeCsvIfPossible();
+    if(!ok) alert("Le dossier a été choisi, mais le navigateur refuse l'écriture. Utilise « Télécharger le CSV ».");
+  }catch(e){
+    $("folderStatus").textContent="Choix du dossier annulé ou refusé. Sauvegarde locale automatique toujours active.";
+  }
+};
+
+$("clearAll").onclick=async()=>{if(confirm("Effacer définitivement toutes les données ?")){shots=[];saveLocal();await writeCsvIfPossible()}};
+
+(async()=>{
+  dirHandle=await loadHandle();
+  if(dirHandle){
+    try{
+      const p=await dirHandle.queryPermission({mode:"readwrite"});
+      if(p==="granted") $("folderStatus").textContent=`Dossier mémorisé : ${dirHandle.name}. CSV automatique actif.`;
+      else $("folderStatus").textContent="Sauvegarde locale automatique active. Le dossier mémorisé devra peut-être être réautorisé.";
+    }catch(e){}
+  }
+})();
+
+function parseCsvLine(line){
+  const out=[]; let cur="",q=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){
+      if(q && line[i+1]==='"'){cur+='"';i++;}
+      else q=!q;
+    }else if(ch===';' && !q){out.push(cur);cur="";}
+    else cur+=ch;
+  }
+  out.push(cur); return out;
+}
+
+$("importCsv").addEventListener("change",async e=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  const text=(await file.text()).replace(/^\uFEFF/,"");
+  const lines=text.split(/\r?\n/).filter(Boolean);
+  if(lines.length<2){alert("CSV vide ou invalide.");return}
+  const headers=parseCsvLine(lines[0]);
+  const imported=[];
+  for(let i=1;i<lines.length;i++){
+    const vals=parseCsvLine(lines[i]), o={};
+    headers.forEach((h,j)=>o[h]=vals[j]??"");
+    const xVal=o.impact_x_cm ?? o.x_cm, yVal=o.impact_y_cm ?? o.y_cm;
+    imported.push({
+      ...o,
+      distance_m:Number(o.distance_m), power_lbs:Number(o.power_lbs),
+      volley_no:Number(o.volley_no), shot_no:Number(o.shot_no),
+      arrow_in_volley:Number(o.arrow_in_volley),
+      x_cm:xVal===""?null:Number(xVal), y_cm:yVal===""?null:Number(yVal),
+      radius_cm:Number(o.impact_ecart_centre_cm||0), direction:o.impact_direction||"",
+      score:Number(o.score), x:(o.impact_X==="OUI" || o.x===true || o.x==="true"),
+      sensation:o.sensation||"", anchor:o.anchor||"", clicker_feel:o.clicker_feel||""
+    });
+  }
+  shots=imported; saveLocal();
+  alert(imported.length+" flèches importées. Va dans Analyse pour voir leur reproduction.");
+});
+</script>
+
+<script>
+let deferredInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault(); deferredInstallPrompt=e;
+  const b=document.getElementById("installApp"); if(b)b.style.display="block";
+});
+document.addEventListener("click",async e=>{
+  if(e.target?.id==="installApp"){
+    if(!deferredInstallPrompt){alert("Ouvre le menu Chrome puis choisis « Installer l’application » ou « Ajouter à l’écran d’accueil ».");return;}
+    deferredInstallPrompt.prompt(); await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt=null; e.target.style.display="none";
+  }
+});
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));}
+</script>
+</body>
+</html>
